@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Sudoku.Exceptions
 {
-    class ValidInputException
+    class ValidInputException : Exception
     {
+        public ValidInputException(string message) : base(message)
+        {
+
+        }
     }
 }

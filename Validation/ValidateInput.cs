@@ -24,10 +24,18 @@ namespace Sudoku.Validation
         /// returns the input
         /// </summary>
         private string Input { get => input; }
+        /// <summary>
+        /// the function returns the length of the input
+        /// </summary>
+        /// <returns>the length of the input</returns>
         private int GetLength()
         {
             return Input.Length;
         }
+        /// <summary>
+        /// the function returns the length of the side of the board
+        /// </summary>
+        /// <returns>the length of the side of the board</returns>
         private double GetSideSize()
         {
             return Math.Sqrt(GetLength());
@@ -60,10 +68,10 @@ namespace Sudoku.Validation
             return num == 1 ? false : true;
         }
         /// <summary>
-        /// the function checks if the board X on X is valid by checking if its prime or not, because 5 on 5 for example 
+        /// the function checks if the board side's length is valid by checking if its prime or not, because 5 on 5 for example 
         /// cannot be a board
         /// </summary>
-        private void ValidXByXSize()
+        private void ValidSideSize()
         {
             int size = (int)GetSideSize();
             if (IsPrime(size))
@@ -71,7 +79,10 @@ namespace Sudoku.Validation
                 errors.Add(new ValidInputException($"the board cannot be {size}x{size}, since {size} is prime"));
             }
         }
-        public void ValidSymbols()
+        /// <summary>
+        /// the function checks if there are symbols who aren't digits or are bigger than the size of the board
+        /// </summary>
+        private void ValidSymbols()
         {
             List<char> notdigits = new List<char>();
             bool prime = false;
@@ -85,7 +96,7 @@ namespace Sudoku.Validation
             }
             if (prime)
             {
-                errors.Add(new ValidInputException($"{string.Join(",", notdigits)}"));
+                errors.Add(new ValidInputException($"{string.Join(",", notdigits)} are not valid symbols for this board"));
             }
         }
     }
