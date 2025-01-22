@@ -43,7 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Calculations\Board.cs" />
+    <Compile Include="BoardBuilding\Board.cs" />
+    <Compile Include="BoardSolving\Solve.cs" />
     <Compile Include="Exceptions\UnsolvableBoardException.cs" />
     <Compile Include="Exceptions\ValidInputException.cs" />
     <Compile Include="Program.cs" />

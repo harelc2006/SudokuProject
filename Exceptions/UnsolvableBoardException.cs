@@ -8,7 +8,7 @@ namespace Sudoku.Exceptions
 {
     class UnsolvableBoardException : Exception
     {
-        public UnsolvableBoardException(string message) : base(message)
+        public UnsolvableBoardException() : base("the board is unsolvable")
         {
 
         }
