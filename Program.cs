@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sudoku.BoardSolving;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,8 @@ namespace Sudoku
 {
     class Program
     {
+        static void Main(string[] args)
+        {
+        }
     }
 }

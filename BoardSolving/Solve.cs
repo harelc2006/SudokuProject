@@ -54,7 +54,7 @@ namespace Sudoku.BoardSolving
             int counter = 0;
             for (int i = board.InnerBoxes[cube, 0]; i <= board.InnerBoxes[cube, 1]; i++)
             {
-                for (int j = board.InnerBoxes[cube, 2]; i <= board.InnerBoxes[cube, 3]; j++)
+                for (int j = board.InnerBoxes[cube, 2]; j <= board.InnerBoxes[cube, 3]; j++)
                 {
                     counter |= 1 << (board.GetBoard[i, j] - 1);
                 }
@@ -76,11 +76,11 @@ namespace Sudoku.BoardSolving
             bool[] cols = new bool[board.InnerBoxWidth];
             for (int i = board.InnerBoxes[cube, 0], index = 0; i <= board.InnerBoxes[cube, 1]; i++, index++)
             {
-                rows[index] = (GetMissingNumbersInRow(i) & (1 << num)) != (1 << num);
+                rows[index] = (GetMissingNumbersInRow(i) & (1 << num)) != 0;
             }
             for (int i = board.InnerBoxes[cube, 2], index = 0; i <= board.InnerBoxes[cube, 3]; i++, index++)
             {
-                cols[index] = (GetMissingNumbersInCol(i) & (1 << num)) != (1 << num);
+                cols[index] = (GetMissingNumbersInCol(i) & (1 << num)) != 0;
             }
             for (int i = 0; i < board.InnerBoxHeight; i++)
             {
@@ -125,23 +125,35 @@ namespace Sudoku.BoardSolving
         /// the function implements the hidden single method , it gets a number and checks what cube can it be placed in and where
         /// </summary>
         /// <param name="number">the number to insert</param>
-        /// <returns>the function returns location to insert the number </returns>
-        private (int,int) HiddenSingle(int number)
+        /// <returns>the function returns location to insert the number and the cube</returns>
+        private (int,int,int) HiddenSingle(int number)
         {
             int row, col;
             number--;
             for(int i = 0; i < board.Side; i++)
             {
-                if((GetMissingNumbersInBox(i) & (1 << number)) != 0)
+                if((GetMissingNumbersInBox(i) & (1 << number)) == 0)
                 {
                     (row, col) = PlaceInCube(i, number + 1);
                     if(row != -1)
                     {
-                        return (row, col);
+                        Place(row, col, i, number + 1);
+                        return (row, col,i);
                     }
                 }
             }
-            return (-1, -1);
+            return (-1, -1, -1);
+        }
+        /// <summary>
+        /// the function  gets a row ,col,cube and number and places the number in the location
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <param name="cube"></param>
+        /// <param name="num"></param>
+        private void Place(int row,int col,int cube,int num)
+        {
+            board.GetBoard[row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]] = num;
         }
     }
 }

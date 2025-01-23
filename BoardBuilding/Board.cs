@@ -70,5 +70,19 @@ namespace Sudoku.BoardBuilding
             }
             return boxes;
         }
+        /// <summary>
+        /// print the board
+        /// </summary>
+        public void PrintBoard()
+        {
+            for (int i = 0; i < Side; i++)
+            {
+                for(int j = 0; j < Side; j++)
+                {
+                    Console.Write(GetBoard[i,j].ToString() , '\t');
+                }
+                Console.WriteLine();
+            }
+        }
     }
 }
