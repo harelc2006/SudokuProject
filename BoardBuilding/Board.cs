@@ -10,7 +10,7 @@ namespace Sudoku.BoardBuilding
     {
         private int[,] board;
         private int[,] inner_boxes;
-        private int height_of_inner_box, width_of_inner_box;
+        private int side,height_of_inner_box, width_of_inner_box;
         /// <summary>
         /// intialize the board
         /// </summary>
@@ -18,7 +18,7 @@ namespace Sudoku.BoardBuilding
         public Board(string input)
         {
             int index = 0;
-            int side = (int)Math.Sqrt(input.Length);
+            this.side = (int)Math.Sqrt(input.Length);
             this.board = new int[side, side];
             for (int i = 0; i < side; i++)
             {
@@ -32,8 +32,9 @@ namespace Sudoku.BoardBuilding
 
         public int[,] GetBoard { get => board; }
         public int[,] InnerBoxes { get => inner_boxes; }
-        public int Height { get => height_of_inner_box; }
-        public int Width { get => width_of_inner_box; }
+        public int InnerBoxHeight { get => height_of_inner_box; }
+        public int InnerBoxWidth { get => width_of_inner_box; }
+        public int Side { get => side; }
 
         /// <summary>
         /// the function returns a 2d array with every row represents an inner box by top, bottom, left ,right  

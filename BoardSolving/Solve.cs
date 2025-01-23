@@ -16,26 +16,48 @@ namespace Sudoku.BoardSolving
             this.board = new Board(input);
         }
         /// <summary>
-        /// the function gets either a row/col and tests which number are in the row/col
-        /// if you want to test col you put -1 in row and vice versa
+        /// the function gets a row and returns the missing numbers in the row
+        /// the missing numbers are returned as an int and if the first bit is on it means the number one is in the row and so on
         /// </summary>
-        /// <param name="row">-1 or the row that needs to be tested</param>
-        /// <param name="col">-1 or the col that needs to be tested</param>
-        /// <returns>if the first bit is on then the number exists and so on</returns>
-        private int GetMissingNumbers(int row, int col)
+        /// <param name="row">the row to check</param>
+        /// <returns>integer who's bit signal which number is in the row</returns>
+        public int GetMissingNumbersInRow(int row)
         {
             int counter = 0;
-            int r_add = row == -1 ? 1 : 0;
-            int c_add = col == -1 ? 1 : 0;
-            int r_index = row == -1 ? 0 : row, c_index = col == -1 ? 0 : col;
-            while (r_index < board.GetBoard.GetLength(0) && c_index < board.GetBoard.GetLength(0))
+            for(int i = 0; i < board.Side; i++)
             {
-                if (board.GetBoard[r_index, c_index] > 0)
+                counter |= 1 << (board.GetBoard[row, i] - 1);
+            }
+            return counter;
+        }
+        /// <summary>
+        /// the function gets a col and returns the missing numbers in the col
+        /// the missing numbers are returned as an int and if the first bit is on it means the number one is in the col and so on        /// </summary>
+        /// <param name="col">the col to check</param>
+        /// <returns>integer who's bit signal which number is in the col</returns>
+        public int GetMissingNumbersInCol(int col)
+        {
+            int counter = 0;
+            for (int i = 0; i < board.Side; i++)
+            {
+                counter |= 1 << (board.GetBoard[i, col] - 1);
+            }
+            return counter;
+        }
+        /// <summary>
+        /// the function gets a cube and returns the missing numbers in the cube
+        /// the missing numbers are returned as an int and if the first bit is on it means the number one is in the cube and so on          /// </summary>
+        /// <param name="cube">the cube to check</param>
+        /// <returns>integer who's bit signal which number is in the cube</returns>
+        private int GetMissingNumbersInBox(int cube)
+        {
+            int counter = 0;
+            for (int i = board.InnerBoxes[cube, 0]; i <= board.InnerBoxes[cube, 1]; i++)
+            {
+                for (int j = board.InnerBoxes[cube, 2]; i <= board.InnerBoxes[cube, 3]; j++)
                 {
-                    counter |= 1 << (board.GetBoard[r_index, c_index] - 1);
+                    counter |= 1 << (board.GetBoard[i, j] - 1);
                 }
-                r_index += r_add;
-                c_index += c_add;
             }
             return counter;
         }
@@ -50,34 +72,34 @@ namespace Sudoku.BoardSolving
         private (int, int) PlaceInCube(int cube, int num)
         {
             num--;
-            bool[] rows = new bool[board.Height];
-            bool[] cols = new bool[board.Width];
+            bool[] rows = new bool[board.InnerBoxHeight];
+            bool[] cols = new bool[board.InnerBoxWidth];
             for (int i = board.InnerBoxes[cube, 0], index = 0; i <= board.InnerBoxes[cube, 1]; i++, index++)
             {
-                rows[index] = (GetMissingNumbers(i, -1) & (1 << num)) != (1 << num);
+                rows[index] = (GetMissingNumbersInRow(i) & (1 << num)) != (1 << num);
             }
             for (int i = board.InnerBoxes[cube, 2], index = 0; i <= board.InnerBoxes[cube, 3]; i++, index++)
             {
-                cols[index] = (GetMissingNumbers(-1, i) & (1 << num)) != (1 << num);
+                cols[index] = (GetMissingNumbersInCol(i) & (1 << num)) != (1 << num);
             }
-            for (int i = 0; i < board.Height; i++)
+            for (int i = 0; i < board.InnerBoxHeight; i++)
             {
                 bool prime = true;
                 if (!rows[i])
                 {
-                    for (int j = 0; j < board.Width && prime; j++)
+                    for (int j = 0; j < board.InnerBoxWidth && prime; j++)
                     {
                         prime = board.GetBoard[board.InnerBoxes[cube, 0] + i, board.InnerBoxes[cube, 2] + j] != 0 || cols[j];
                     }
                     rows[i] = prime;
                 }
             }
-            for (int i = 0; i < board.Width; i++)
+            for (int i = 0; i < board.InnerBoxWidth; i++)
             {
                 bool prime = true;
                 if (!cols[i])
                 {
-                    for (int j = 0; j < board.Height && prime; j++)
+                    for (int j = 0; j < board.InnerBoxHeight && prime; j++)
                     {
                         prime = board.GetBoard[board.InnerBoxes[cube, 0] + j, board.InnerBoxes[cube, 2] + i] != 0 || rows[j];
                     }
@@ -98,6 +120,28 @@ namespace Sudoku.BoardSolving
             {
                 return (-1, -1);
             }
+        }
+        /// <summary>
+        /// the function implements the hidden single method , it gets a number and checks what cube can it be placed in and where
+        /// </summary>
+        /// <param name="number">the number to insert</param>
+        /// <returns>the function returns location to insert the number </returns>
+        private (int,int) HiddenSingle(int number)
+        {
+            int row, col;
+            number--;
+            for(int i = 0; i < board.Side; i++)
+            {
+                if((GetMissingNumbersInBox(i) & (1 << number)) != 0)
+                {
+                    (row, col) = PlaceInCube(i, number + 1);
+                    if(row != -1)
+                    {
+                        return (row, col);
+                    }
+                }
+            }
+            return (-1, -1);
         }
     }
 }
