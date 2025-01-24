@@ -77,11 +77,19 @@ namespace Sudoku.BoardBuilding
         {
             for (int i = 0; i < Side; i++)
             {
-                for(int j = 0; j < Side; j++)
+                for (int j = 0; j < Side; j++)
                 {
-                    Console.Write(GetBoard[i,j].ToString() , '\t');
+                    Console.Write(GetBoard[i,j] + " ");
+                    if (j % 3 == 2)
+                    {
+                        Console.Write("| ");
+                    }
                 }
                 Console.WriteLine();
+                if (i % 3 == 2)
+                {
+                    Console.WriteLine("---------------------");
+                }
             }
         }
     }

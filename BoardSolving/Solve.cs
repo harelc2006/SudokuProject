@@ -15,6 +15,7 @@ namespace Sudoku.BoardSolving
         {
             this.board = new Board(input);
         }
+        public Board Board { get => board;}
         /// <summary>
         /// the function gets a row and returns the missing numbers in the row
         /// the missing numbers are returned as an int and if the first bit is on it means the number one is in the row and so on
@@ -26,7 +27,10 @@ namespace Sudoku.BoardSolving
             int counter = 0;
             for(int i = 0; i < board.Side; i++)
             {
-                counter |= 1 << (board.GetBoard[row, i] - 1);
+                if(board.GetBoard[row, i] != 0)
+                {
+                    counter |= 1 << (board.GetBoard[row, i] - 1);
+                }
             }
             return counter;
         }
@@ -40,7 +44,10 @@ namespace Sudoku.BoardSolving
             int counter = 0;
             for (int i = 0; i < board.Side; i++)
             {
-                counter |= 1 << (board.GetBoard[i, col] - 1);
+                if (board.GetBoard[i, col] != 0)
+                {
+                    counter |= 1 << (board.GetBoard[i, col] - 1);
+                }
             }
             return counter;
         }
@@ -56,7 +63,10 @@ namespace Sudoku.BoardSolving
             {
                 for (int j = board.InnerBoxes[cube, 2]; j <= board.InnerBoxes[cube, 3]; j++)
                 {
-                    counter |= 1 << (board.GetBoard[i, j] - 1);
+                    if (board.GetBoard[i, j] != 0)
+                    {
+                        counter |= 1 << (board.GetBoard[i, j] - 1);
+                    }
                 }
             }
             return counter;
@@ -76,10 +86,12 @@ namespace Sudoku.BoardSolving
             bool[] cols = new bool[board.InnerBoxWidth];
             for (int i = board.InnerBoxes[cube, 0], index = 0; i <= board.InnerBoxes[cube, 1]; i++, index++)
             {
+                int missing = GetMissingNumbersInRow(i);
                 rows[index] = (GetMissingNumbersInRow(i) & (1 << num)) != 0;
             }
             for (int i = board.InnerBoxes[cube, 2], index = 0; i <= board.InnerBoxes[cube, 3]; i++, index++)
             {
+                int missing = GetMissingNumbersInCol(i);
                 cols[index] = (GetMissingNumbersInCol(i) & (1 << num)) != 0;
             }
             for (int i = 0; i < board.InnerBoxHeight; i++)
@@ -126,9 +138,10 @@ namespace Sudoku.BoardSolving
         /// </summary>
         /// <param name="number">the number to insert</param>
         /// <returns>the function returns location to insert the number and the cube</returns>
-        private (int,int,int) HiddenSingle(int number)
+        private bool HiddenSingle(int number)
         {
             int row, col;
+            bool prime = false;
             number--;
             for(int i = 0; i < board.Side; i++)
             {
@@ -138,11 +151,47 @@ namespace Sudoku.BoardSolving
                     if(row != -1)
                     {
                         Place(row, col, i, number + 1);
-                        return (row, col,i);
+                        prime = true;
                     }
                 }
             }
-            return (-1, -1, -1);
+            return prime;
+        }
+        /// <summary>
+        /// the function implements the naked single algorithm - that check if there is only one number missing in the row, col and box
+        /// the function puts the misssing number in its place and returns true if there is only one missing if not it returns false 
+        /// </summary>
+        /// <returns>if there is even one number found</returns>
+        private bool NakedSingle()
+        {
+            bool prime = false;
+            for(int c = 0; c < board.Side; c++)
+            {
+                int missingInBox = GetMissingNumbersInBox(c);
+                for(int i=0;i< board.InnerBoxHeight; i++)
+                {
+                    int missingInRow = GetMissingNumbersInRow(i+board.InnerBoxes[c,0]);
+                    for (int j = 0; j < board.InnerBoxWidth; j++)
+                    {
+                        if(board.GetBoard[i + board.InnerBoxes[c, 0], j + board.InnerBoxes[c, 2]] == 0)
+                        {
+                            int missingNumbers = (GetMissingNumbersInCol(j + board.InnerBoxes[c, 2]) | missingInRow | missingInBox);
+                            missingNumbers = (~missingNumbers) & ((1 << board.Side) - 1);
+                            if (missingNumbers == 0)
+                            {
+                                throw new UnsolvableBoardException();
+                            }
+                            else if ((missingNumbers & (missingNumbers - 1)) == 0) //tests if a number is a power of 2
+                            {
+                                int number = (int)(Math.Log(missingNumbers) / Math.Log(2)) + 1;
+                                Place(i, j, c, number);
+                                prime = true;
+                            }
+                        }
+                    }
+                }
+            }
+            return prime;
         }
         /// <summary>
         /// the function  gets a row ,col,cube and number and places the number in the location
@@ -154,6 +203,30 @@ namespace Sudoku.BoardSolving
         private void Place(int row,int col,int cube,int num)
         {
             board.GetBoard[row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]] = num;
+        }
+        /// <summary>
+        /// the main function of the solving solving the board - right now its incomplete and can only use simple techniques
+        /// </summary>
+        public void SolveBoard()
+        {
+            int count = 0;
+            while (board.GetBoard.Cast<int>().Count(n => n == 0) != 0)
+            {
+                bool prime = true;
+                while (prime)
+                {
+                    prime = false;
+                    for(int i = 1; i <= board.Side; i++)
+                    {
+                        if (HiddenSingle(i))
+                        {
+                            prime = true;
+                        }
+                    }
+                    count++;
+                }
+                NakedSingle();
+            }
         }
     }
 }
