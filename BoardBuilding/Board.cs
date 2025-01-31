@@ -30,7 +30,7 @@ namespace Sudoku.BoardBuilding
             this.inner_boxes = GetInnerBoxes();
         }
 
-        public int[,] GetBoard { get => board; }
+        public int[,] GetBoard { get => board; set => board = value; }
         public int[,] InnerBoxes { get => inner_boxes; }
         public int InnerBoxHeight { get => height_of_inner_box; }
         public int InnerBoxWidth { get => width_of_inner_box; }
@@ -69,6 +69,10 @@ namespace Sudoku.BoardBuilding
                 }
             }
             return boxes;
+        }
+        public int GetCube(int i,int j)
+        {
+            return (i / InnerBoxHeight * InnerBoxWidth + (j / InnerBoxWidth % InnerBoxHeight));
         }
         /// <summary>
         /// print the board

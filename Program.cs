@@ -16,13 +16,14 @@ namespace Sudoku
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            string str = "000870400090004600600009012000040751201007098000300000002010003700003000850900040";
+            string str = "1.....3.8.7.4..............2.3.1...........958.........5.6...7.....8.2...4.......";
+            str = str.Replace(".", "0");
             Solve solve = new Solve(str);
             solve.Board.PrintBoard();
             Console.WriteLine("\n\n\n");
-            solve.SolveBoard();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Console.WriteLine(solve.BackTracking()); 
             solve.Board.PrintBoard();
             stopwatch.Stop();
             TimeSpan elapsed = stopwatch.Elapsed;

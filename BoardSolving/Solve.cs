@@ -11,66 +11,14 @@ namespace Sudoku.BoardSolving
     class Solve
     {
         private Board board;
+        private OptionsManager om;
         public Solve(string input)
         {
             this.board = new Board(input);
+            this.om = new OptionsManager(board);
         }
-        public Board Board { get => board;}
-        /// <summary>
-        /// the function gets a row and returns the missing numbers in the row
-        /// the missing numbers are returned as an int and if the first bit is on it means the number one is in the row and so on
-        /// </summary>
-        /// <param name="row">the row to check</param>
-        /// <returns>integer who's bit signal which number is in the row</returns>
-        public int GetMissingNumbersInRow(int row)
-        {
-            int counter = 0;
-            for(int i = 0; i < board.Side; i++)
-            {
-                if(board.GetBoard[row, i] != 0)
-                {
-                    counter |= 1 << (board.GetBoard[row, i] - 1);
-                }
-            }
-            return counter;
-        }
-        /// <summary>
-        /// the function gets a col and returns the missing numbers in the col
-        /// the missing numbers are returned as an int and if the first bit is on it means the number one is in the col and so on        /// </summary>
-        /// <param name="col">the col to check</param>
-        /// <returns>integer who's bit signal which number is in the col</returns>
-        public int GetMissingNumbersInCol(int col)
-        {
-            int counter = 0;
-            for (int i = 0; i < board.Side; i++)
-            {
-                if (board.GetBoard[i, col] != 0)
-                {
-                    counter |= 1 << (board.GetBoard[i, col] - 1);
-                }
-            }
-            return counter;
-        }
-        /// <summary>
-        /// the function gets a cube and returns the missing numbers in the cube
-        /// the missing numbers are returned as an int and if the first bit is on it means the number one is in the cube and so on          /// </summary>
-        /// <param name="cube">the cube to check</param>
-        /// <returns>integer who's bit signal which number is in the cube</returns>
-        private int GetMissingNumbersInBox(int cube)
-        {
-            int counter = 0;
-            for (int i = board.InnerBoxes[cube, 0]; i <= board.InnerBoxes[cube, 1]; i++)
-            {
-                for (int j = board.InnerBoxes[cube, 2]; j <= board.InnerBoxes[cube, 3]; j++)
-                {
-                    if (board.GetBoard[i, j] != 0)
-                    {
-                        counter |= 1 << (board.GetBoard[i, j] - 1);
-                    }
-                }
-            }
-            return counter;
-        }
+        public Board Board { get => board; }
+        
         /// <summary>
         /// the function gets a cube number and a number, assuming the number isn't in the cube and checks if the number can be placed in that cube and if it can be 
         /// placed there it returns where if it can't be placed there it returns (-1,-1) the function also checks if there is not
@@ -86,13 +34,11 @@ namespace Sudoku.BoardSolving
             bool[] cols = new bool[board.InnerBoxWidth];
             for (int i = board.InnerBoxes[cube, 0], index = 0; i <= board.InnerBoxes[cube, 1]; i++, index++)
             {
-                int missing = GetMissingNumbersInRow(i);
-                rows[index] = (GetMissingNumbersInRow(i) & (1 << num)) != 0;
+                rows[index] = (om.Rows[i] & (1 << num)) != 0;
             }
             for (int i = board.InnerBoxes[cube, 2], index = 0; i <= board.InnerBoxes[cube, 3]; i++, index++)
             {
-                int missing = GetMissingNumbersInCol(i);
-                cols[index] = (GetMissingNumbersInCol(i) & (1 << num)) != 0;
+                cols[index] = (om.Cols[i] & (1 << num)) != 0;
             }
             for (int i = 0; i < board.InnerBoxHeight; i++)
             {
@@ -138,55 +84,21 @@ namespace Sudoku.BoardSolving
         /// </summary>
         /// <param name="number">the number to insert</param>
         /// <returns>the function returns location to insert the number and the cube</returns>
-        private bool HiddenSingle(int number)
+        private bool HiddenSingle()
         {
             int row, col;
             bool prime = false;
-            number--;
-            for(int i = 0; i < board.Side; i++)
+            for (int number=0;number< board.Side; number++)
             {
-                if((GetMissingNumbersInBox(i) & (1 << number)) == 0)
+                for (int i = 0; i < board.Side; i++)
                 {
-                    (row, col) = PlaceInCube(i, number + 1);
-                    if(row != -1)
+                    if ((om.Boxes[i] & (1 << number)) == 0)
                     {
-                        Place(row, col, i, number + 1);
-                        prime = true;
-                    }
-                }
-            }
-            return prime;
-        }
-        /// <summary>
-        /// the function implements the naked single algorithm - that check if there is only one number missing in the row, col and box
-        /// the function puts the misssing number in its place and returns true if there is only one missing if not it returns false 
-        /// </summary>
-        /// <returns>if there is even one number found</returns>
-        private bool NakedSingle()
-        {
-            bool prime = false;
-            for(int c = 0; c < board.Side; c++)
-            {
-                int missingInBox = GetMissingNumbersInBox(c);
-                for(int i=0;i< board.InnerBoxHeight; i++)
-                {
-                    int missingInRow = GetMissingNumbersInRow(i+board.InnerBoxes[c,0]);
-                    for (int j = 0; j < board.InnerBoxWidth; j++)
-                    {
-                        if(board.GetBoard[i + board.InnerBoxes[c, 0], j + board.InnerBoxes[c, 2]] == 0)
+                        (row, col) = PlaceInCube(i, number + 1);
+                        if (row != -1)
                         {
-                            int missingNumbers = (GetMissingNumbersInCol(j + board.InnerBoxes[c, 2]) | missingInRow | missingInBox);
-                            missingNumbers = (~missingNumbers) & ((1 << board.Side) - 1);
-                            if (missingNumbers == 0)
-                            {
-                                throw new UnsolvableBoardException();
-                            }
-                            else if ((missingNumbers & (missingNumbers - 1)) == 0) //tests if a number is a power of 2
-                            {
-                                int number = (int)(Math.Log(missingNumbers) / Math.Log(2)) + 1;
-                                Place(i, j, c, number);
-                                prime = true;
-                            }
+                            Place(row, col, i, number + 1);
+                            prime = true;
                         }
                     }
                 }
@@ -200,33 +112,103 @@ namespace Sudoku.BoardSolving
         /// <param name="col"></param>
         /// <param name="cube"></param>
         /// <param name="num"></param>
-        private void Place(int row,int col,int cube,int num)
+        private void Place(int row, int col, int cube, int num)
         {
             board.GetBoard[row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]] = num;
+            om.UpdateOptions(row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2], num);
+            CheckAfterUpdate(row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]);
         }
-        /// <summary>
-        /// the main function of the solving solving the board - right now its incomplete and can only use simple techniques
-        /// </summary>
-        public void SolveBoard()
+        
+        private void CheckAfterUpdate(int row, int col)
         {
-            int count = 0;
-            while (board.GetBoard.Cast<int>().Count(n => n == 0) != 0)
+            List<int[]> places = new List<int[]>();
+            for(int i = 0; i < board.Side; i++)
             {
-                bool prime = true;
-                while (prime)
+                if(board.GetBoard[row,i] == 0)
                 {
-                    prime = false;
-                    for(int i = 1; i <= board.Side; i++)
+                    if((om.Options[row,i]& (om.Options[row,i] - 1)) == 0)
                     {
-                        if (HiddenSingle(i))
+                        int cube = board.GetCube(row, i);
+                        int r = row - board.InnerBoxes[cube, 0];
+                        int c = i - board.InnerBoxes[cube, 2];
+                        int num = (int)(Math.Log(om.Options[row, i]) / Math.Log(2)) + 1;
+                        int[] tmp = {r,c,cube,num};
+                        places.Add(tmp);
+                    }
+                }
+            }
+            for (int i = 0; i < board.Side; i++)
+            {
+                if (board.GetBoard[i, col] == 0)
+                {
+                    if ((om.Options[i, col] & (om.Options[i, col] - 1)) == 0)
+                    {
+                        int cube = board.GetCube(i, col);
+                        int r = i - board.InnerBoxes[cube, 0];
+                        int c = col - board.InnerBoxes[cube, 2];
+                        int num = (int)(Math.Log(om.Options[i, col]) / Math.Log(2)) + 1;
+                        int[] tmp = { r, c, cube, num };
+                        places.Add(tmp);
+                    }
+                }
+            }
+            for (int i = board.InnerBoxes[board.GetCube(row, col), 0]; i <= board.InnerBoxes[board.GetCube(row, col), 1]; i++)
+            {
+                for (int j = board.InnerBoxes[board.GetCube(row, col), 2]; j <= board.InnerBoxes[board.GetCube(row, col), 3]; j++)
+                {
+                    if (board.GetBoard[i, j] == 0)
+                    {
+                        if ((om.Options[i, j] & (om.Options[i, j] - 1)) == 0)
                         {
-                            prime = true;
+                            int cube = board.GetCube(i, j);
+                            int r = i - board.InnerBoxes[cube, 0];
+                            int c = j - board.InnerBoxes[cube, 2];
+                            int num = (int)(Math.Log(om.Options[i, j]) / Math.Log(2)) + 1;
+                            int[] tmp = { r, c, cube, num };
+                            places.Add(tmp);
                         }
                     }
-                    count++;
                 }
-                NakedSingle();
             }
+            for(int i = 0; i < places.Count; i++)
+            {
+                Place(places[i][0], places[i][1], places[i][2], places[i][3]);
+            }
+        }
+                /// <summary>
+        /// the main function of the solving solving the board - right now its incomplete and can only use simple techniques
+        /// </summary>
+        public bool BackTracking()
+        {
+            if (board.GetBoard.Cast<int>().All(n => n != 0))
+                return true;
+
+            int row, col;
+            (row, col) = om.GetLowestOptions();
+            int cube = board.GetCube(row, col);
+            if (row == -1)
+                return false;
+            for (int option = om.Options[row, col], index = 1; option > 0; option = option >> 1, index++)
+            {
+                if ((option & 1) == 1)
+                {
+                    int[,] copy = board.GetBoard.Clone() as int[,];
+                    try
+                    {
+                        Place(row - board.InnerBoxes[cube, 0], col - board.InnerBoxes[cube, 2], cube, index);
+                        if (BackTracking())
+                            return true;
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    board.GetBoard = copy.Clone() as int[,];
+                    om = new OptionsManager(board);
+                    om.Options[row, col] &= (~(1 << (index - 1))) & ((1 << board.Side) - 1);
+                }
+            }
+            return false;
         }
     }
 }
