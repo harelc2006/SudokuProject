@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Sudoku.BoardSolving
 {
+    /// <summary>
+    /// this class is used manage the options of the board
+    /// </summary>
     class OptionsManager
     {
         private Board board;
@@ -15,12 +18,13 @@ namespace Sudoku.BoardSolving
         private int[] cols;
         private int[] boxes;
         private int[,] options;
-
+        /// <summary>
+        /// get functions for the variables
+        /// </summary>
         public int[] Rows { get => rows; }
         public int[] Cols { get => cols; }
         public int[] Boxes { get => boxes; }
         public int[,] Options { get => options; }
-
 
         public OptionsManager(Board board)
         {
@@ -109,6 +113,12 @@ namespace Sudoku.BoardSolving
             int cube = board.GetCube(row, col);
             return ~(Rows[row] | Cols[col] | Boxes[cube]) & ((1 << board.Side) - 1);
         }
+        /// <summary>
+        /// this function update the options in the row , col and box acording to the number inserted
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <param name="number"></param>
         public void UpdateOptions(int row, int col, int number)
         {
             int cube = board.GetCube(row, col);
@@ -152,6 +162,9 @@ namespace Sudoku.BoardSolving
                 }
             }
         }
+        /// <summary>
+        /// the function intialize the options array
+        /// </summary>
         public void IntializeOptions()
         {
             for (int i = 0; i < board.Side; i++)
@@ -165,6 +178,10 @@ namespace Sudoku.BoardSolving
                 }
             }
         }
+        /// <summary>
+        /// the function returns the cell with the lowest amount of options 
+        /// </summary>
+        /// <returns>the row,col or -1,-1 if there is no cell with the lowest options found</returns>
         public (int, int) GetLowestOptions()
         {
             int min = 10, row = 0, col = 0;
@@ -195,22 +212,38 @@ namespace Sudoku.BoardSolving
             }
             return (row, col);
         }
+        public int CountBits(int num)
+        {
+            int count = 0;
+            while (num > 0)
+            {
+                num &= num - 1;
+                count++;
+            }
+            return count;
+        }
         public void PrintOptions()
         {
             for (int i = 0; i < board.Side; i++)
             {
                 for (int j = 0; j < board.Side; j++)
                 {
-                    Console.Write(Convert.ToString(options[i, j] >= 0 ? options[i, j] : 0, 2) + " ");
+                    string op = Convert.ToString(options[i, j] >= 0 ? options[i, j] : 0, 2);
+                    for (int k = 0; k < board.Side - op.Length; k++)
+                    {
+                        Console.Write(" ");
+                    }
+                    Console.Write(op);
                     if (j % 3 == 2)
                     {
                         Console.Write("| ");
                     }
+                    Console.Write(" ");
                 }
                 Console.WriteLine();
                 if (i % 3 == 2)
                 {
-                    Console.WriteLine("---------------------");
+                    Console.WriteLine("----------------------------------------------------------------------------------------------");
                 }
             }
         }
