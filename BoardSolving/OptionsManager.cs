@@ -18,13 +18,15 @@ namespace Sudoku.BoardSolving
         private int[] cols;
         private int[] boxes;
         private int[,] options;
+        private int[,] countOption;
         /// <summary>
         /// get functions for the variables
         /// </summary>
-        public int[] Rows { get => rows; }
-        public int[] Cols { get => cols; }
-        public int[] Boxes { get => boxes; }
-        public int[,] Options { get => options; }
+        public int[] Rows { get => rows; set => rows = value; }
+        public int[] Cols { get => cols; set => cols = value; }
+        public int[] Boxes { get => boxes; set => boxes = value; }
+        public int[,] Options { get => options; set => options = value; }
+        public int[,] CountOption { get => countOption; set => countOption = value; }
 
         public OptionsManager(Board board)
         {
@@ -33,6 +35,7 @@ namespace Sudoku.BoardSolving
             this.cols = new int[board.Side];
             this.boxes = new int[board.Side];
             this.options = new int[board.Side, board.Side];
+            this.countOption = new int[board.Side, board.Side];
             for (int i = 0; i < board.Side; i++)
             {
                 Rows[i] = GetMissingNumbersInRow(i);
@@ -129,6 +132,10 @@ namespace Sudoku.BoardSolving
             {
                 if(board.GetBoard[row, i] == 0)
                 {
+                    if((Options[row, i] & 1<<(number-1)) != 0)
+                    {
+                        countOption[row, i]--;
+                    }
                     Options[row, i] &= ~(1 << (number - 1));
                     if (Options[row, i] == 0)
                     {
@@ -174,9 +181,31 @@ namespace Sudoku.BoardSolving
                     if (board.GetBoard[i, j] == 0)
                     {
                         options[i, j] = GetOptions(i, j);
+                        countOption[i, j] = CountBits(options[i, j]);
                     }
                 }
             }
+        }
+        private int GetImpact(int row,int col)
+        {
+            int impact = 0;
+            int cube = board.GetCube(row, col);
+            int set = Options[row, col];
+            for(int i = 0; i < board.Side; i++)
+            {
+                impact += CountBits(Options[row, i] & set);
+            }
+            for (int i = 0; i < board.Side; i++)
+            {
+                impact += CountBits(Options[i, col] & set);
+            }
+            for (int i = 0; i < board.Side; i++)
+            {
+                int row1 = i / board.InnerBoxWidth + board.InnerBoxes[cube, 0];
+                int col1 = i % board.InnerBoxHeight + board.InnerBoxes[cube, 2];
+                impact += CountBits(Options[row1, col1] & set);
+            }
+            return (impact - (3 * CountBits(set)));
         }
         /// <summary>
         /// the function returns the cell with the lowest amount of options 
@@ -184,24 +213,30 @@ namespace Sudoku.BoardSolving
         /// <returns>the row,col or -1,-1 if there is no cell with the lowest options found</returns>
         public (int, int) GetLowestOptions()
         {
-            int min = 10, row = 0, col = 0;
+            int min = 10, row = 0, col = 0,impact = 0;
             for (int i = 0; i < board.Side; i++)
             {
                 for (int j = 0; j < board.Side; j++)
                 {
                     if (board.GetBoard[i, j] == 0)
                     {
-                        int number = options[i, j], count = 0;
-                        while (number > 0)
-                        {
-                            number &= number - 1;
-                            count++;
-                        }
+                        int count = countOption[i,j];
                         if (min > count)
                         {
                             min = count;
                             row = i;
                             col = j;
+                            impact = GetImpact(row, col);
+                        }
+                        if(min == count)
+                        {
+                            int saveImpact = GetImpact(i, j);
+                            if(saveImpact > impact)
+                            {
+                                impact = saveImpact;
+                                row = i;
+                                col = j;
+                            }
                         }
                     }
                 }
