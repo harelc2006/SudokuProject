@@ -16,7 +16,8 @@ namespace Sudoku
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            string str = "6.2.5.........3.4..........43...8....1....2........7..5..27...........81...6.....";
+            string str = Console.ReadLine();
+            Console.WriteLine(str.Length);
             str = str.Replace(".", "0");
             Solve solve = new Solve(str);
             solve.Board.PrintBoard();

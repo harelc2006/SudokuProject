@@ -12,18 +12,18 @@ namespace Sudoku.BoardSolving
     {
         private Board board;
         private OptionsManager om;
-        private Stack<(int, int)> placements;
+        private Stack<int[,]> boards;
         private readonly Dictionary<int, int> powersOfTwo;
         private enum opNames { row, col, box };
         public Solve(string input)
         {
             this.board = new Board(input);
             this.om = new OptionsManager(board);
-            this.placements = new Stack<(int, int)>();
+            this.boards = new Stack<int[,]>();
             this.powersOfTwo = new Dictionary<int, int>();
-            for(int i = 0; i < board.Side; i++)
+            for (int i = 0; i < board.Side; i++)
             {
-                this.powersOfTwo.Add(1 << i,i+1);
+                this.powersOfTwo.Add(1 << i, i + 1);
             }
         }
         public Board Board { get => board; }
@@ -99,18 +99,19 @@ namespace Sudoku.BoardSolving
         {
             int row, col;
             bool prime = false;
-            for (int number = 0; number < board.Side; number++)
+            int number;
+            for (int i = 0; i < board.Side; i++)
             {
-                for (int i = 0; i < board.Side; i++)
+                int set = (~om.Boxes[i]) & ((1 << board.Side) - 1);
+                Stack<int> op = GetOptions(set);
+                while(op.Count != 0)
                 {
-                    if ((om.Boxes[i] & (1 << number)) == 0)
+                    number = op.Pop();
+                    (row, col) = PlaceInCube(i, number);
+                    if (row != -1)
                     {
-                        (row, col) = PlaceInCube(i, number + 1);
-                        if (row != -1)
-                        {
-                            Place(row, col, i, number + 1);
-                            prime = true;
-                        }
+                        Place(row, col, i, number);
+                        prime = true;
                     }
                 }
             }
@@ -169,7 +170,7 @@ namespace Sudoku.BoardSolving
         }
         private bool NakedCandidatesCol(int col)
         {
-            for (int i = 6; i >= 2; i--)
+            for (int i = board.Side/2+2; i >= 2; i--)
             {
                 int[] locs = new int[i];
                 bool prime = true;
@@ -252,7 +253,7 @@ namespace Sudoku.BoardSolving
                         om.Options[num, i] &= ((~set) & ((1 << board.Side) - 1));
                         if (om.CountBits(om.Options[num, i]) == 1)
                         {
-                            Place(num, i, PowersOfTwo[om.Options[num,i]]);
+                            Place(num, i, PowersOfTwo[om.Options[num, i]]);
                         }
                         else if (om.CountBits(om.Options[num, i]) == 0)
                         {
@@ -311,7 +312,6 @@ namespace Sudoku.BoardSolving
         /// <param name="num"></param>
         private void Place(int row, int col, int cube, int num)
         {
-            placements.Push((row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]));
             board.GetBoard[row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]] = num;
             om.Options[row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]] = 0;
             om.UpdateOptions(row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2], num);
@@ -319,7 +319,6 @@ namespace Sudoku.BoardSolving
         }
         private void Place(int row, int col, int num)
         {
-            placements.Push((row, col));
             board.GetBoard[row, col] = num;
             om.Options[row, col] = 0;
             om.UpdateOptions(row, col, num);
@@ -377,13 +376,13 @@ namespace Sudoku.BoardSolving
         /// </summary>
         public bool SolveBoard()
         {
-            if (board.GetBoard.Cast<int>().All(n => n != 0))
+            if (IsSolved())
                 return true;
             try
             {
                 NakedCandidatesAll();
             }
-            catch (Exception)
+            catch (UnsolvableBoardException)
             {
                 return false;
             }
@@ -391,20 +390,20 @@ namespace Sudoku.BoardSolving
         }
         private bool BackTracking()
         {
-            if (board.GetBoard.Cast<int>().All(n => n != 0))
+            if (IsSolved())
                 return true;
             while (HiddenSingle()) ;
-            if (board.GetBoard.Cast<int>().All(n => n != 0))
+            if (IsSolved())
                 return true;
             int row, col;
             (row, col) = om.GetLowestOptions();
             if (row == -1)
                 return false;
-            Stack<int> op = GetSortedOptions(row, col);
-            while(op.Count != 0)
+            Stack<int> op = GetOptions(om.Options[row, col]);
+            while (op.Count != 0)
             {
+                boards.Push(board.GetBoard.Clone() as int[,]);
                 int index = op.Pop();
-                int loc = placements.Count;
                 try
                 {
                     Place(row, col, index);
@@ -416,25 +415,28 @@ namespace Sudoku.BoardSolving
                 {
 
                 }
-                int count = placements.Count;
-                for (int i = loc; i < count; i++)
-                {
-                    int r, c;
-                    (r, c) = placements.Pop();
-                    board.GetBoard[r, c] = 0;
-                }
+                board.GetBoard = boards.Pop();
                 om = new OptionsManager(board);
             }
             return false;
         }
-        private Stack<int> GetSortedOptions(int row ,int col)
+        private Stack<int> GetOptions(int set)
         {
             Stack<int> op = new Stack<int>();
-            for (int option = om.Options[row,col]; option > 0; option &= option - 1)
+            for (int option = set; option > 0; option &= option - 1)
             {
                 op.Push(PowersOfTwo[option & (~(option - 1))]);
             }
             return op;
+        }
+        private bool IsSolved()
+        {
+            for(int i = 0; i < board.Side; i++)
+            {
+                if (om.Rows[i] != (1 << board.Side) - 1)
+                    return false;
+            }
+            return true;
         }
     }
 }

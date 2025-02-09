@@ -79,22 +79,34 @@ namespace Sudoku.BoardBuilding
         /// </summary>
         public void PrintBoard()
         {
-            for (int i = 0; i < Side; i++)
+            int size = board.GetLength(0);
+            int boxSize = (int)Math.Sqrt(size);
+
+            if (boxSize * boxSize != size)
             {
-                for (int j = 0; j < Side; j++)
-                {
-                    Console.Write(GetBoard[i,j] + " ");
-                    if (j % 3 == 2)
-                    {
-                        Console.Write("| ");
-                    }
-                }
-                Console.WriteLine();
-                if (i % 3 == 2)
-                {
-                    Console.WriteLine("---------------------");
-                }
+                Console.WriteLine("Invalid Sudoku size.");
+                return;
             }
+
+            string horizontalLine = " " + new string('-', size * 2 + boxSize + 1);
+
+            for (int row = 0; row < size; row++)
+            {
+                if (row % boxSize == 0)
+                    Console.WriteLine(horizontalLine);
+
+                for (int col = 0; col < size; col++)
+                {
+                    if (col % boxSize == 0)
+                        Console.Write("| ");
+
+                    Console.Write(board[row, col] == 0 ? "0 " : (char)('0'+board[row, col]) + " ");
+                }
+
+                Console.WriteLine("|");
+            }
+
+            Console.WriteLine(horizontalLine);
         }
     }
 }

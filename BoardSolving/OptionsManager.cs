@@ -213,7 +213,7 @@ namespace Sudoku.BoardSolving
         /// <returns>the row,col or -1,-1 if there is no cell with the lowest options found</returns>
         public (int, int) GetLowestOptions()
         {
-            int min = 10, row = 0, col = 0,impact = 0;
+            int min = board.Side+1, row = 0, col = 0,impact = 0;
             for (int i = 0; i < board.Side; i++)
             {
                 for (int j = 0; j < board.Side; j++)
@@ -241,7 +241,7 @@ namespace Sudoku.BoardSolving
                     }
                 }
             }
-            if(min == 10)
+            if(min == board.Side+1)
             {
                 return (-1, -1);
             }
