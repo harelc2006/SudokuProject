@@ -107,11 +107,14 @@ namespace Sudoku.BoardSolving
                 while(op.Count != 0)
                 {
                     number = op.Pop();
-                    (row, col) = PlaceInCube(i, number);
-                    if (row != -1)
+                    if ((om.Boxes[i] & (1<<(number-1))) == 0)
                     {
-                        Place(row, col, i, number);
-                        prime = true;
+                        (row, col) = PlaceInCube(i, number);
+                        if (row != -1)
+                        {
+                            Place(row, col, i, number);
+                            prime = true;
+                        }
                     }
                 }
             }
@@ -407,7 +410,10 @@ namespace Sudoku.BoardSolving
                 try
                 {
                     Place(row, col, index);
-                    NakedCandidatesAll();
+                    if(board.Side != 25)
+                    {
+                        NakedCandidatesAll();
+                    }
                     if (BackTracking())
                         return true;
                 }
