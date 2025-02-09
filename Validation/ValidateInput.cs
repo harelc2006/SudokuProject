@@ -50,23 +50,6 @@ namespace Sudoku.Validation
                 errors.Add(new ValidInputException($"{GetLength()} is not a valid length for a sudoku board"));
             }
         }
-
-        /// <summary>
-        /// the function gets a number and returns if its prime or not
-        /// </summary>
-        /// <param name="num">the number the function gets</param>
-        /// <returns>if the number is prime</returns>
-        private bool IsPrime(int num)
-        {
-            for (int i = 2; i <= num / 2; i++)
-            {
-                if (num % i == 0)
-                {
-                    return false;
-                }
-            }
-            return num == 1 ? false : true;
-        }
         /// <summary>
         /// the function checks if the board side's length is valid by checking if its prime or not, because 5 on 5 for example 
         /// cannot be a board
@@ -74,9 +57,9 @@ namespace Sudoku.Validation
         private void ValidSideSize()
         {
             int size = (int)GetSideSize();
-            if (IsPrime(size))
+            if (Math.Sqrt(size) % 1 == 0)
             {
-                errors.Add(new ValidInputException($"the board cannot be {size}x{size}, since {size} is prime"));
+                errors.Add(new ValidInputException($"the board cannot be {size}x{size}, since {size} has no square root"));
             }
         }
         /// <summary>

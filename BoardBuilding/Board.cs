@@ -43,16 +43,8 @@ namespace Sudoku.BoardBuilding
         private int[,] GetInnerBoxes()
         {
             int side = board.GetLength(0);
-            int height_side = 0;
+            int height_side = (int)Math.Sqrt(side);
             bool prime = true;
-            for (int i = (int)Math.Floor(Math.Sqrt(side)); i >= 2 && prime; i--)
-            {
-                if (side % i == 0)
-                {
-                    height_side = i;
-                    prime = false;
-                }
-            }
             int width_side = side / height_side;
             this.height_of_inner_box = height_side;
             this.width_of_inner_box = width_side;
