@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sudoku.BoardBuilding
 {
-    class Board
+    public class Board
     {
         private int[,] board;
         private int[,] inner_boxes;
@@ -44,7 +44,6 @@ namespace Sudoku.BoardBuilding
         {
             int side = board.GetLength(0);
             int height_side = (int)Math.Sqrt(side);
-            bool prime = true;
             int width_side = side / height_side;
             this.height_of_inner_box = height_side;
             this.width_of_inner_box = width_side;

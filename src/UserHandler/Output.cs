@@ -1,8 +1,11 @@
-﻿using Sudoku.BoardSolving;
+﻿using Sudoku.BoardBuilding;
+using Sudoku.BoardSolving;
+using Sudoku.Validation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,28 +13,27 @@ namespace Sudoku.UserHandler
 {
     public static class Output
     {
-        public static void SolveForUser(string str)
+        public static void PresentBoardToUser(Solve solve)
         {
-            Solve solve = new Solve(str);
-            if (solve.SolveBoard())
-            {
-                solve.Board.PrintBoard();
-            }
-            else
-            {
-                Console.WriteLine("the board is unsolvable");
-            }
+            solve.Board.PrintBoard();
         }
-        public static string SolveForTests(string str)
+        public static void PresentUnsolvableToUser()
         {
-            Solve solve = new Solve(str);
-            if (solve.SolveBoard())
+            Console.WriteLine("the board is unsolvable");
+        }
+        public static string PresentBoardForTests(Solve solve)
+        {
+            return solve.Board.GetBoardAsString();
+        }
+        public static string PresentUsolvableBoardForTests()
+        {
+            return "the board is unsolvable";
+        }
+        public static void AddToFile(string path,Solve solve)
+        {
+            using(StreamWriter streamWriter = new StreamWriter(path,append: true))
             {
-                return solve.Board.GetBoardAsString();
-            }
-            else
-            {
-                return "the board is unsolvable";
+                streamWriter.WriteLine("\n" + solve.Board.GetBoardAsString());
             }
         }
     }

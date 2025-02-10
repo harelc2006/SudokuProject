@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Sudoku.BoardSolving
 {
-    class Solve
+    public class Solve
     {
         private Board board;
         private OptionsManager om;
