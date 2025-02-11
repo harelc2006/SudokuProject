@@ -15,19 +15,27 @@ namespace Sudoku
         {
             Input input = new Input();
             string boardStr = input.Start();
-            ValidateInput vi = new ValidateInput(boardStr);
-            Solve solve = new Solve(boardStr);
-            if (solve.SolveBoard())
+            while(boardStr != "exit")
             {
-                Output.PresentBoardToUser(solve);
-            }
-            else
-            {
-                Output.PresentUnsolvableToUser();
-            }
-            if(input.Type == Input.inputType.file)
-            {
-                Output.AddToFile(input.FilePath, solve);
+                ValidateInput vi = new ValidateInput(boardStr);
+                if (vi.Validate())
+                {
+                    Solve solve = new Solve(boardStr);
+                    if (solve.SolveBoard())
+                    {
+                        Output.PresentBoardToUser(solve);
+                    }
+                    else
+                    {
+                        Output.PresentUnsolvableToUser();
+                    }
+                    if (input.Type == Input.inputType.file)
+                    {
+                        Output.AddToFile(input.FilePath, solve);
+                    }
+                }
+                Console.WriteLine();
+                boardStr = input.Start();
             }
         }
         public static string SolveForTests(string str)

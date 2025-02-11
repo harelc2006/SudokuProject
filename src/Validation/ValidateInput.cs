@@ -1,4 +1,5 @@
-﻿using Sudoku.Exceptions;
+﻿using Sudoku.BoardBuilding;
+using Sudoku.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +50,10 @@ namespace Sudoku.Validation
             {
                 errors.Add(new ValidInputException($"{GetLength()} is not a valid length for a sudoku board"));
             }
+            if(GetSideSize() > 25)
+            {
+                errors.Add(new ValidInputException($"board size can't be over 25x25"));
+            }
         }
         /// <summary>
         /// the function checks if the board side's length is valid by checking if its prime or not, because 5 on 5 for example 
@@ -57,7 +62,8 @@ namespace Sudoku.Validation
         private void ValidSideSize()
         {
             int size = (int)GetSideSize();
-            if (Math.Sqrt(size) % 1 == 0)
+            double sideSize = Math.Sqrt(GetSideSize());
+            if (sideSize % 1 != 0)
             {
                 errors.Add(new ValidInputException($"the board cannot be {size}x{size}, since {size} has no square root"));
             }
@@ -71,7 +77,7 @@ namespace Sudoku.Validation
             bool prime = false;
             foreach (char ch in Input)
             {
-                if (ch - '0' <= 0 && ch - '0' > GetSideSize())
+                if (ch - '0' < 0 || ch - '0' > GetSideSize())
                 {
                     notdigits.Add(ch);
                     prime = true;
@@ -79,8 +85,71 @@ namespace Sudoku.Validation
             }
             if (prime)
             {
-                errors.Add(new ValidInputException($"{string.Join(",", notdigits)} are not valid symbols for this board"));
+                string pronounce = notdigits.Count > 1 ? "are" : "is";
+                errors.Add(new ValidInputException($"{string.Join(",", notdigits)} {pronounce} not valid symbols for this board"));
             }
+        }
+        private void ValidateBoard()
+        {
+            Board board = new Board(this.Input);
+            int[] rows = new int[board.Side];
+            int[] cols = new int[board.Side];
+            int[] boxes = new int[board.Side];
+            int save;
+            for (int i = 0;i < board.Side; i++)
+            {
+                for(int j = 0; j < board.Side; j++)
+                {
+                    if(board.GetBoard[i, j] == 0)
+                    {
+                        continue;
+                    }
+                    save = rows[i];
+                    rows[i] |= (1<<(board.GetBoard[i, j]-1));
+                    if (save == rows[i])
+                        throw new InvalidBoardExecption();
+                    save = cols[j];
+                    cols[j] |= (1 << (board.GetBoard[i, j] - 1));
+                    if (save == cols[j])
+                        throw new InvalidBoardExecption();
+                    save = boxes[board.GetCube(i,j)];
+                    boxes[board.GetCube(i, j)] |= (1 << (board.GetBoard[i, j] - 1));
+                    if (save == boxes[board.GetCube(i, j)])
+                        throw new InvalidBoardExecption();
+                }
+            }
+        }
+        public bool Validate()
+        {
+            ValidLength();
+            ValidSymbols();
+            if (errors.Count != 0)
+            {
+                foreach(Exception ex in errors)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                return false;
+            }
+            ValidSideSize();
+            if (errors.Count != 0)
+            {
+                foreach (Exception ex in errors)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                return false;
+            }
+            try
+            {
+                ValidateBoard();
+            }
+            catch (InvalidBoardExecption ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+            return true;
         }
     }
 }

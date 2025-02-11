@@ -24,12 +24,12 @@ namespace Sudoku.UserHandler
         public string Start()
         {
             string message = "Click 1 : for typing your sudoku board mannually\n" +
-                "Click 2 : for reading it out of a filePress enter when you made your choice";
+                "Click 2 : for reading it out of a filePress enter when you made your choice\nClick 3 to exit";
             Console.WriteLine(message);
             string choice = Console.ReadLine();
-            while (!(choice.Equals("1") || choice.Equals("2")))
+            while (!(choice.Equals("1") || choice.Equals("2") || choice.Equals("3")))
             {
-                Console.WriteLine("please enter 1 or 2");
+                Console.WriteLine("please enter 1, 2 or 3");
                 Console.WriteLine(message);
                 choice = Console.ReadLine();
             }
@@ -37,10 +37,11 @@ namespace Sudoku.UserHandler
             {
                 return(ReadFromUser());
             }
-            else
+            else if(choice.Equals("2"))
             {
                 return (ReadFromFile());
             }
+            return "exit";
 
         }
         private string ReadFromUser()
