@@ -20,7 +20,7 @@ namespace Sudoku.BoardSolving
         private int[,] options;
         private int[,] countOption;
         /// <summary>
-        /// get functions for the variables
+        /// gets and sets functions for the variables
         /// </summary>
         public int[] Rows { get => rows; set => rows = value; }
         public int[] Cols { get => cols; set => cols = value; }
@@ -186,6 +186,12 @@ namespace Sudoku.BoardSolving
                 }
             }
         }
+        /// <summary>
+        /// returns the impact of the options ,how many cell's option will they remove
+        /// </summary>
+        /// <param name="row">the row of the cell</param>
+        /// <param name="col">the col of the cell</param>
+        /// <returns>how many cell's option will they remove</returns>
         private int GetImpact(int row,int col)
         {
             int impact = 0;
@@ -208,7 +214,8 @@ namespace Sudoku.BoardSolving
             return (impact - (3 * CountBits(set)));
         }
         /// <summary>
-        /// the function returns the cell with the lowest amount of options 
+        /// the function returns the cell with the lowest amount of options and if there is 
+        /// tie on how many options it returns the one with the most impact
         /// </summary>
         /// <returns>the row,col or -1,-1 if there is no cell with the lowest options found</returns>
         public (int, int) GetLowestOptions()
@@ -247,6 +254,11 @@ namespace Sudoku.BoardSolving
             }
             return (row, col);
         }
+        /// <summary>
+        /// the function counts how many bits are on in the int
+        /// </summary>
+        /// <param name="num">the number</param>
+        /// <returns>how many bit are on</returns>
         public int CountBits(int num)
         {
             int count = 0;
@@ -256,31 +268,6 @@ namespace Sudoku.BoardSolving
                 count++;
             }
             return count;
-        }
-        public void PrintOptions()
-        {
-            for (int i = 0; i < board.Side; i++)
-            {
-                for (int j = 0; j < board.Side; j++)
-                {
-                    string op = Convert.ToString(options[i, j] >= 0 ? options[i, j] : 0, 2);
-                    for (int k = 0; k < board.Side - op.Length; k++)
-                    {
-                        Console.Write(" ");
-                    }
-                    Console.Write(op);
-                    if (j % 3 == 2)
-                    {
-                        Console.Write("| ");
-                    }
-                    Console.Write(" ");
-                }
-                Console.WriteLine();
-                if (i % 3 == 2)
-                {
-                    Console.WriteLine("----------------------------------------------------------------------------------------------");
-                }
-            }
         }
     }
 }

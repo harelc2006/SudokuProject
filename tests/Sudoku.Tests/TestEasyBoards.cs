@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Sudoku.Tests
 {
+    /// <summary>
+    /// tests easy board
+    /// </summary>
     public class TestEasyBoards
     {
         [Fact]

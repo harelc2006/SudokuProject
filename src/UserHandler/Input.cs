@@ -7,12 +7,16 @@ using System.Threading.Tasks;
 
 namespace Sudoku.UserHandler
 {
+    /// <summary>
+    /// a class to manage the input
+    /// </summary>
     public class Input
     {
         public enum inputType {user,file};
         private inputType type;
         private string filePath;
 
+        //getters and setters
         public inputType Type { get => type; set => type = value; }
         public string FilePath { get => filePath; set => filePath = value; }
 
@@ -21,6 +25,10 @@ namespace Sudoku.UserHandler
             this.type = inputType.user;
             this.filePath = "";
         }
+        /// <summary>
+        /// the menu for the user
+        /// </summary>
+        /// <returns>the inputted board as a string</returns>
         public string Start()
         {
             string message = "Click 1 : for typing your sudoku board mannually\n" +
@@ -44,6 +52,10 @@ namespace Sudoku.UserHandler
             return "exit";
 
         }
+        /// <summary>
+        /// reads board from the user 
+        /// </summary>
+        /// <returns>the board as string</returns>
         private string ReadFromUser()
         {
             Console.WriteLine("Please enter your soduko board");
@@ -56,6 +68,10 @@ namespace Sudoku.UserHandler
             this.type = inputType.user;
             return board;
         }
+        /// <summary>
+        /// reads the board from a file
+        /// </summary>
+        /// <returns>the board as string</returns>
         private string ReadFromFile()
         {
             Console.WriteLine("Please enter you file path with no \"");

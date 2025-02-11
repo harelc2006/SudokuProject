@@ -14,7 +14,7 @@ namespace Sudoku.BoardSolving
         private OptionsManager om;
         private Stack<int[,]> boards;
         private readonly Dictionary<int, int> powersOfTwo;
-        private enum opNames { row, col, box };
+        private enum opNames { row, col, box }; //enum - representing row,col and box
         public Solve(string input)
         {
             this.board = new Board(input);
@@ -26,6 +26,7 @@ namespace Sudoku.BoardSolving
                 this.powersOfTwo.Add(1 << i, i + 1);
             }
         }
+        //getters and setters
         public Board Board { get => board; }
 
         public Dictionary<int, int> PowersOfTwo => powersOfTwo;
@@ -120,25 +121,33 @@ namespace Sudoku.BoardSolving
             }
             return prime;
         }
+        /// <summary>
+        /// the function implements the naked candidates for each row ,col and box
+        /// </summary>
+        /// <returns>if it changed something</returns>
         private bool NakedCandidatesAll()
         {
             bool prime = false;
             for (int i = 0; i < board.Side; i++)
             {
-                if (NakedCandidatesRow(i) | NakedCandidatesCol(i) | NakedCandidatesBox(i))
+                if (NakedCandidatesRow(i) || NakedCandidatesCol(i) || NakedCandidatesBox(i))
                 {
                     prime = true;
                 }
             }
             return prime;
         }
-        private bool NakedCandidatesByRowAndCol(int row, int col)
-        {
-            return NakedCandidatesRow(row) | NakedCandidatesCol(col) | NakedCandidatesBox(board.GetCube(row, col));
-        }
+        /// <summary>
+        /// the function implements naked candidates in the row
+        /// naked candidates - if there are 3 cells in the row with 3 options together , those 3 options cant be in any other place
+        /// in the row , that what naked candidates does it checks if there are x cell that have x amount of options and 
+        /// if it thats the case it removes those options from the other cells in the row
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns>if it found any set that matches those rules</returns>
         private bool NakedCandidatesRow(int row)
         {
-            for (int i = 2; i <= board.Side/2 +2 ; i++)
+            for (int i = 2; i <= board.Side/2 +1 ; i++)
             {
                 int[] locs = new int[i];
                 bool prime = true;
@@ -171,6 +180,14 @@ namespace Sudoku.BoardSolving
             }
             return false;
         }
+        /// <summary>
+        /// the function implements naked candidates in the col
+        /// naked candidates - if there are 3 cells in the col with 3 options together , those 3 options cant be in any other place
+        /// in the col , that what naked candidates does it checks if there are x cell that have x amount of options and 
+        /// if it thats the case it removes those options from the other cells in the row
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns>if it found any set that matches those rules</returns>
         private bool NakedCandidatesCol(int col)
         {
             for (int i = 2; i <= board.Side / 2 + 2; i++)
@@ -206,6 +223,14 @@ namespace Sudoku.BoardSolving
             }
             return false;
         }
+        /// <summary>
+        /// the function implements naked candidates in the box
+        /// naked candidates - if there are 3 cells in the box with 3 options together , those 3 options cant be in any other place
+        /// in the box , that what naked candidates does it checks if there are x cell that have x amount of options and 
+        /// if it thats the case it removes those options from the other cells in the row
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns>if it found any set that matches those rules</returns>
         private bool NakedCandidatesBox(int cube)
         {
             for (int i = 2; i <= board.Side / 2 + 2; i++)
@@ -245,6 +270,14 @@ namespace Sudoku.BoardSolving
             }
             return false;
         }
+        /// <summary>
+        /// if there any sets of x cells with x amount options it removes those option from other cells
+        /// </summary>
+        /// <param name="locs">safe locations - parts of the set</param>
+        /// <param name="set">the options to remove</param>
+        /// <param name="num">number of row/col/box</param>
+        /// <param name="type">row/col/box</param>
+        /// <exception cref="UnsolvableBoardException"></exception>
         private void UpdateOptionsAfterNakedCandidates(int[] locs, int set, int num, opNames type)
         {
             if (type == opNames.row)
@@ -320,6 +353,12 @@ namespace Sudoku.BoardSolving
             om.UpdateOptions(row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2], num);
             CheckAfterUpdate(row + board.InnerBoxes[cube, 0], col + board.InnerBoxes[cube, 2]);
         }
+        /// <summary>
+        /// the function places num in row,col
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <param name="num"></param>
         private void Place(int row, int col, int num)
         {
             board.GetBoard[row, col] = num;
@@ -375,7 +414,8 @@ namespace Sudoku.BoardSolving
             }
         }
         /// <summary>
-        /// the main function of the solving solving the board - right now its incomplete and can only use simple techniques
+        /// the main function of the solving solving the board, first it checks if the board is solvable after that it tries simple
+        /// techniques if that doesnt work , it tries back tracking
         /// </summary>
         public bool SolveBoard()
         {
@@ -389,8 +429,16 @@ namespace Sudoku.BoardSolving
             {
                 return false;
             }
+            while (HiddenSingle()) ;
+            if (IsSolved())
+                return true;
             return BackTracking();
         }
+        /// <summary>
+        /// backtracking function , the function tries to place a value from a cell's option 
+        /// it gets the best cell to place it in
+        /// </summary>
+        /// <returns>if it solved or not</returns>
         private bool BackTracking()
         {
             if (IsSolved())

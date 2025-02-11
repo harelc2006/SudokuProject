@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Sudoku.Validation
 {
+    /// <summary>
+    /// a class to validate the input
+    /// </summary>
     class ValidateInput
     {
         private string input; //the string inputed
@@ -56,8 +59,7 @@ namespace Sudoku.Validation
             }
         }
         /// <summary>
-        /// the function checks if the board side's length is valid by checking if its prime or not, because 5 on 5 for example 
-        /// cannot be a board
+        /// the function checks if the board side's length is valid by checking if it has square root
         /// </summary>
         private void ValidSideSize()
         {
@@ -69,7 +71,7 @@ namespace Sudoku.Validation
             }
         }
         /// <summary>
-        /// the function checks if there are symbols who aren't digits or are bigger than the size of the board
+        /// the function checks if there are symbols who aren't valid characters
         /// </summary>
         private void ValidSymbols()
         {
@@ -89,6 +91,10 @@ namespace Sudoku.Validation
                 errors.Add(new ValidInputException($"{string.Join(",", notdigits)} {pronounce} not valid symbols for this board"));
             }
         }
+        /// <summary>
+        /// the function checks if the board inserted is valid - no same chars in row/col/box
+        /// </summary>
+        /// <exception cref="InvalidBoardExecption"></exception>
         private void ValidateBoard()
         {
             Board board = new Board(this.Input);
@@ -119,10 +125,14 @@ namespace Sudoku.Validation
                 }
             }
         }
+        /// <summary>
+        /// the main function of the class , uses all the help function's to test if there if the input is valid and present the right message
+        /// </summary>
+        /// <returns></returns>
         public bool Validate()
         {
-            ValidLength();
-            ValidSymbols();
+            ValidLength();//checks if the length is valid
+            ValidSymbols();//checks if the symbols are valid
             if (errors.Count != 0)
             {
                 foreach(Exception ex in errors)
@@ -131,7 +141,7 @@ namespace Sudoku.Validation
                 }
                 return false;
             }
-            ValidSideSize();
+            ValidSideSize(); //checks if the inner boxes size is valid
             if (errors.Count != 0)
             {
                 foreach (Exception ex in errors)
@@ -142,7 +152,7 @@ namespace Sudoku.Validation
             }
             try
             {
-                ValidateBoard();
+                ValidateBoard(); //validate the soduko board - if its valid to solve
             }
             catch (InvalidBoardExecption ex)
             {

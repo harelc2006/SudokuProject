@@ -29,7 +29,7 @@ namespace Sudoku.BoardBuilding
             }
             this.inner_boxes = GetInnerBoxes();
         }
-
+        //gets and sets
         public int[,] GetBoard { get => board; set => board = value; }
         public int[,] InnerBoxes { get => inner_boxes; }
         public int InnerBoxHeight { get => height_of_inner_box; }
@@ -61,6 +61,12 @@ namespace Sudoku.BoardBuilding
             }
             return boxes;
         }
+        /// <summary>
+        /// the function returns the cube by the row and col
+        /// </summary>
+        /// <param name="i">row</param>
+        /// <param name="j">col</param>
+        /// <returns>the cube number</returns>
         public int GetCube(int i,int j)
         {
             return (i / InnerBoxHeight * InnerBoxWidth + (j / InnerBoxWidth % InnerBoxHeight));
@@ -99,6 +105,10 @@ namespace Sudoku.BoardBuilding
 
             Console.WriteLine(horizontalLine);
         }
+        /// <summary>
+        /// returns the board as string
+        /// </summary>
+        /// <returns>the board as a string</returns>
         public string GetBoardAsString()
         {
             char[] boardChars = new char[board.Length];
