@@ -12,7 +12,7 @@ namespace Sudoku.UserHandler
     /// </summary>
     public class Input
     {
-        public enum inputType {user,file};
+        public enum inputType {user,file,exit};
         private inputType type;
         private string filePath;
 
@@ -32,7 +32,7 @@ namespace Sudoku.UserHandler
         public string Start()
         {
             string message = "Click 1 : for typing your sudoku board mannually\n" +
-                "Click 2 : for reading it out of a filePress enter when you made your choice\nClick 3 to exit";
+                "Click 2 : for reading it out of a file\nClick 3 : to exit\nPress enter when you made your choice";
             Console.WriteLine(message);
             string choice = Console.ReadLine();
             while (!(choice.Equals("1") || choice.Equals("2") || choice.Equals("3")))
@@ -49,6 +49,7 @@ namespace Sudoku.UserHandler
             {
                 return (ReadFromFile());
             }
+            Type = inputType.exit;
             return "exit";
 
         }
@@ -74,7 +75,7 @@ namespace Sudoku.UserHandler
         /// <returns>the board as string</returns>
         private string ReadFromFile()
         {
-            Console.WriteLine("Please enter you file path with no \"");
+            Console.WriteLine("Please enter you file path with no \" (the solved sudoku board will be added to the file)");
             string path = Console.ReadLine();
             if(!string.IsNullOrWhiteSpace(path))
             {

@@ -3,6 +3,9 @@ namespace Sudoku.Tests
 {
     public class TestEmptyBoards
     {
+        /// <summary>
+        /// tests empty boards
+        /// </summary>
         [Fact]
         public void Test1by1()
         {

@@ -3,6 +3,7 @@ using Sudoku.UserHandler;
 using Sudoku.Validation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,20 +20,28 @@ namespace Sudoku
         /// </summary>
         public static void SolveForUsers()
         {
+            Console.WriteLine("Welcome to my sudoku solver");
             Input input = new Input();
             string boardStr = input.Start();
-            while(boardStr != "exit")
+            while(input.Type != Input.inputType.exit)
             {
                 ValidateInput vi = new ValidateInput(boardStr);
                 if (vi.Validate())
                 {
                     Solve solve = new Solve(boardStr);
+                    Stopwatch stopWatch = Stopwatch.StartNew();
                     if (solve.SolveBoard())
                     {
+                        stopWatch.Stop();
+                        TimeSpan timeSpan = stopWatch.Elapsed;
+                        Console.WriteLine(timeSpan.TotalMilliseconds + " ms");
                         Output.PresentBoardToUser(solve);
                     }
                     else
                     {
+                        stopWatch.Stop();
+                        TimeSpan timeSpan = stopWatch.Elapsed;
+                        Console.WriteLine(timeSpan.TotalMilliseconds + " ms");
                         Output.PresentUnsolvableToUser();
                     }
                     if (input.Type == Input.inputType.file)
