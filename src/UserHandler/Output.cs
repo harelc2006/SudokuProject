@@ -22,14 +22,18 @@ namespace Sudoku.UserHandler
         /// <param name="solve"></param>
         public static void PresentBoardToUser(Solve solve)
         {
+            Console.ForegroundColor = ConsoleColor.Green;
             solve.Board.PrintBoard();
+            Console.ForegroundColor = ConsoleColor.White;
         }
         /// <summary>
         /// if the board is unsolvable it presents to the user
         /// </summary>
         public static void PresentUnsolvableToUser()
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("the board is unsolvable");
+            Console.ForegroundColor = ConsoleColor.White;
         }
         /// <summary>
         /// presents the board for tests

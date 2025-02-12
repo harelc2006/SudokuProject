@@ -20,7 +20,7 @@ namespace Sudoku
         /// </summary>
         public static void SolveForUsers()
         {
-            Console.WriteLine("Welcome to my sudoku solver");
+            Console.WriteLine("\tWelcome to my sudoku solver");
             Input input = new Input();
             string boardStr = input.Start();
             while(input.Type != Input.inputType.exit)
